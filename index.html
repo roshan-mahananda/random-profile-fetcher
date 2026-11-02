@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX JSON Data Fetcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh;
+            margin: 0;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-6">
+
+    <div class="glass-card rounded-3xl p-8 max-w-sm w-full text-center text-white relative overflow-hidden transition-all duration-300 transform hover:scale-105">
+        
+        <h2 class="text-xl font-bold tracking-wider uppercase mb-6 text-white/90">Random Profile</h2>
+        
+        <div id="loader" class="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-10 hidden rounded-3xl">
+            <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <div id="profile-content" class="opacity-0 transition-opacity duration-500">
+            <img id="avatar" src="" alt="Profile Picture" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white/50 object-cover shadow-lg">
+            
+            <h1 id="name" class="text-3xl font-bold mb-1 drop-shadow-md">Loading...</h1>
+            <p id="location" class="text-sm font-light text-white/80 mb-6 flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Loading...</span>
+            </p>
+
+            <div class="bg-black/10 rounded-xl p-4 mb-6 text-left">
+                <div class="mb-2">
+                    <span class="text-xs uppercase font-bold text-white/60 tracking-wider">Email</span>
+                    <p id="email" class="text-sm font-medium truncate">Loading...</p>
+                </div>
+                <div>
+                    <span class="text-xs uppercase font-bold text-white/60 tracking-wider">Phone</span>
+                    <p id="phone" class="text-sm font-medium">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="fetchRandomUser()" class="w-full bg-white text-indigo-600 font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-indigo-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+            Fetch New Person
+        </button>
+    </div>
+
+    <script>
+        function fetchRandomUser() {
+            const loader = document.getElementById('loader');
+            const content = document.getElementById('profile-content');
+            
+            loader.classList.remove('hidden');
+            content.classList.remove('opacity-100');
+            content.classList.add('opacity-0');
+
+            fetch('https://randomuser.me/api/')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const user = data.results[0];
+                    
+                    document.getElementById('avatar').src = user.picture.large;
+                    document.getElementById('name').textContent = `${user.name.first} ${user.name.last}`;
+                    document.getElementById('location').querySelector('span').textContent = `${user.location.city}, ${user.location.country}`;
+                    document.getElementById('email').textContent = user.email;
+                    document.getElementById('phone').textContent = user.phone;
+
+                    setTimeout(() => {
+                        loader.classList.add('hidden');
+                        content.classList.remove('opacity-0');
+                        content.classList.add('opacity-100');
+                    }, 400);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('name').textContent = "Error loading data";
+                    loader.classList.add('hidden');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchRandomUser);
+    </script>
+</body>
+</html>
